@@ -21,6 +21,8 @@
 
 教授もLisper (CL-MPIの作者) → http://metahack.org
 
+n/p キーで前進/後退
+
 #+BEGIN_CONTAINER-FLUID
 #+BEGIN_ROW-FLUID
 #+BEGIN_SPAN6

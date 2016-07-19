@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>もうひとつのAI技術: 自動プランニング</title>
-<!-- 2016-07-19 火 16:14 -->
+<!-- 2016-07-19 火 16:17 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <style type="text/css">
@@ -166,6 +166,10 @@ for the JavaScript code in this tag.
 
 <p>
 教授もLisper (CL-MPIの作者) → <a href="http://metahack.org">http://metahack.org</a>
+</p>
+
+<p>
+n/p キーで前進/後退
 </p>
 
 <div class="container-fluid">
@@ -1407,7 +1411,7 @@ Pineda, Zilberstein, 2014. Planning Under Uncertainty Using Reduced Models: Revi
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Created: 2016-07-19 火 16:14</p>
+<p class="date">Created: 2016-07-19 火 16:17</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
