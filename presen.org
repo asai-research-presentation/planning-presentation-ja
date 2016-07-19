@@ -1,4 +1,4 @@
-#+title: {プランニング, Lisp} × {マクロ, ユーティリティ, Utility Problem}
+#+title: もうひとつのAI技術: 自動プランニング
 #+author: 
 #+include: "head.org"
 #+LINK: img file:img/%s
