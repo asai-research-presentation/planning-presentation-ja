@@ -47,7 +47,14 @@ give a brief introduction to my research field and what I do.
 + 古典プランニングの拡張クラス (より実用的)
 + プランニングの「ユーザ」として何をすればよいか
 
-* AI Topics -- プランニングへのイントロダクション
+* 
+
+#+BEGIN_CENTER
+#+BEGIN_XLARGE
+自動プランニングへのイントロダクション
+#+END_XLARGE
+#+END_CENTER
+
 ** 誰?
 
  #+BEGIN_CONTAINER-FLUID
