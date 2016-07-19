@@ -46,6 +46,7 @@ give a brief introduction to my research field and what I do.
 + 古典プランニング
 + 古典プランニングの拡張クラス (より実用的)
 + プランニングの「ユーザ」として何をすればよいか
++ まとめ
 
 * 
 
@@ -695,3 +696,14 @@ Pineda, Zilberstein, 2014. Planning Under Uncertainty Using Reduced Models: Revi
 + コンペ参加条件: *ソースコードの公開*
 
 + 優秀なソルバをダウンロードできる (*ビルドできるとは限らない・・・*)
+
+* まとめ
+
++ ここに書いたことはほぼすべて AIMA 3rd Edition に載っている
+  + ← AIやってて知らない人はモグリ
++ 日本以外では Symbolic AI は普通に実用されている
+  + 第五世代の傷跡
+  + 大学の授業に組み入れられている
++ 日本人研究者で状態空間探索をやっている研究室は数えるのみ
+  + 状態空間探索: プランニング/ゲーム
+
