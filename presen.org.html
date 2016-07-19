@@ -1,0 +1,1385 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>もうひとつのAI技術: 自動プランニング</title>
+<!-- 2016-07-19 火 16:03 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="css/layout.css" />
+<link rel="stylesheet" type="text/css" href="css/default.css" />
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.loupe.min.js"></script>
+<script type="text/javascript" src="js/jgestures/jgestures.min.js"></script>
+<script type="text/javascript" src="js/code.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">もうひとつのAI技術: 自動プランニング</h1>
+<div class="outline-text-1">
+<div class="center">
+<div class="larger">
+<p>
+<b>浅井 政太郎 (guicho2.71828)</b>
+</p>
+
+</div>
+
+<p>
+東京大学 総合文化研究科 博士2年
+</p>
+
+<p>
+分野: 人工知能 推論・探索
+</p>
+
+<p>
+高速プランニングソルバの開発
+</p>
+
+<p>
+教授もLisper (CL-MPIの作者) → <a href="http://metahack.org">http://metahack.org</a>
+</p>
+
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro.png" alt="astro.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue.png" alt="rescue.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div class="resume">
+<p>
+My name is Masataro Asai, in this presentation, as other people do, Id like to 
+give a brief introduction to my research field and what I do.
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 章立て</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>自動プランニングへのイントロダクション &#x2014; 目的、スコープ
+</li>
+<li>古典プランニング
+</li>
+<li>古典プランニングの拡張クラス (より実用的)
+</li>
+<li>プランニングの「ユーザ」として何をすればよいか
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> </h2>
+<div class="outline-text-2" id="text-2">
+<div class="center">
+<div class="xlarge">
+<p>
+自動プランニングへのイントロダクション
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 誰?</h3>
+<div class="outline-text-3" id="text-2-1">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro/1.png" alt="1.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue/1.png" alt="1.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+And let me introduce these robots.
+The guy in the left is Astro boy.
+</p>
+
+</div>
+</div>
+
+<div id="outline-container-sec-2-1-1" class="outline-4">
+<h4 id="sec-2-1-1"><span class="section-number-4">2.1.1</span> 誰?</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro/2.png" alt="2.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue/1.png" alt="1.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+As you know, he is a famous manga superhero invented by Tezuka Osamu in 50s,
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-1-2" class="outline-4">
+<h4 id="sec-2-1-2"><span class="section-number-4">2.1.2</span> 誰?</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro/final.png" alt="final.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue/1.png" alt="1.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+and he can think, hear, speak, act. he also has emotions.
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-1-3" class="outline-4">
+<h4 id="sec-2-1-3"><span class="section-number-4">2.1.3</span> 誰?</h4>
+<div class="outline-text-4" id="text-2-1-3">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro/final.png" alt="final.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue/2.png" alt="2.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+In contrast, the guy in the right is a real robot that is actually in use @ fukuoka prefecture for the rescue purpose..
+His name is T-52 Enryu, developped by a Japanese company Temzak.
+He is huge and powerful &#x2013; about 4 meters in height and can carry things which is as heavy as 500kg.
+Well, so, in a sense, he is also a superhero in the real disastrous situation.
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-1-4" class="outline-4">
+<h4 id="sec-2-1-4"><span class="section-number-4">2.1.4</span> 誰?</h4>
+<div class="outline-text-4" id="text-2-1-4">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro/final.png" alt="final.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue/3.png" alt="3.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+But does he have feelings or can he think? Can he even move around by his own?
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-1-5" class="outline-4">
+<h4 id="sec-2-1-5"><span class="section-number-4">2.1.5</span> 誰?</h4>
+<div class="outline-text-4" id="text-2-1-5">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/astro/final.png" alt="final.png" />
+</p>
+</div>
+
+</div>
+<div class="span6">
+
+<div class="figure">
+<p><img src="img/rescue/final.png" alt="final.png" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+No. It requires full human intervention &#x2014; it is indeed operated by a
+driver who gets in or by a remote control. It is more like a
+super-sophisticated shovel car.
+</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 実際の大規模災害では非実用的 &#x2014; 操縦士が足りない!</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span2">
+<p>
+<img src="img/rescue.png" alt="rescue.png" />
+<img src="img/rescue.png" alt="rescue.png" />
+<img src="img/rescue.png" alt="rescue.png" />
+<img src="img/silent.png" alt="silent.png" />
+</p>
+
+</div>
+<div class="span10">
+
+<div class="figure">
+<p><img src="img/static/tsunami.jpg" alt="tsunami.jpg" />
+</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="larger">
+<div class="alignright">
+<ul class="org-ul">
+<li>そのままでは役に立たない!
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+Now the problem is : It's ok in small accidents but is impractical in the real, massive 
+natural disaster which frequently occurs in Japan.
+The key resource is human &#x2014;
+These special purpose vehicles require human intervention,
+thus they are useless without trained operators.
+</p>
+
+</div>
+</div>
+
+<div id="outline-container-sec-2-2-1" class="outline-4">
+<h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> 操縦士を増やせない &#x2013; Human Resource and Training</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span4">
+
+<div class="figure">
+<p><img src="img/rescue/1.png" alt="1.png" />
+</p>
+</div>
+
+</div>
+<div class="span8">
+<p>
+
+</p>
+
+<dl class="org-dl">
+<dt> ✘ <i>時間</i> がかかる </dt><dd>訓練に ＞100時間, <b>必要な時だけ増やす</b> のは不可能
+</dd>
+<dt> ✘ <i>￥￥￥￥</i> がかかる </dt><dd>訓練官、訓練場所、訓練用具
+</dd>
+<dt> ✘ 技術は <i>維持が重要</i> </dt><dd>定期的な再訓練、長期的コスト、さらなるマニー
+</dd>
+<dt> ✘ 平時は <i>無駄</i> な技術 </dt><dd>普段は意味がない &#x2013; 無駄なマニー!
+</dd>
+</dl>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="resume">
+<p>
+In a natural disaster, we need as many experienced operators as possible.
+However, it is virtually impossible due to several reasons. 
+</p>
+
+<p>
+First, training takes time.
+It is impossible to quickly increase the number of operators as needed, at the time of disaster.
+</p>
+
+<p>
+Second, the money matters.
+Training a person costs a lot of money, including: the cost of maintaining
+a training center, the cost of additional vehicles for training, the cost
+of training the trainers, wages for trainers, etc.
+</p>
+
+<p>
+Third, Skills need to be updated and maintained.
+You know, how about preparing the large number of operators in advance?
+No, the society cannot torelate the cost of keep training them.
+Operators may lose the skills and skills may become outdated.
+</p>
+
+<p>
+Finally, in a normal situation, those skills are useless.
+It forces the society to waste a great amount of extra money.
+</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> だからこそ: 自動プランナ Automated Planner</h3>
+<div class="outline-text-3" id="text-2-3">
+
+<div class="figure">
+<p><img src="img/planning/1.png" alt="1.png" />
+</p>
+</div>
+
+<div class="resume">
+<p>
+研究テーマのプランニングは、ロボットに、人間の助けを借りず、いかに自律して行動させるかを扱います。
+これをモデル化したプランニング問題は、具体的な行動の列を求める 組合せ最適化問題です。
+</p>
+
+<p>
+プランニング問題のタスクは、
+センサーから初期状態とゴールを受け取って、被災者を助ける正しい手順を出力することです。
+</p>
+
+<p>
+たとえば、この図では男性が瓦礫に埋まって助けを求めています。
+プランニング機能のあるロボットは、コレに対して「男性を助けよ」という大まかな指示を受けます。
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> だからこそ: 自動プランナ Automated Planner</h3>
+<div class="outline-text-3" id="text-2-4">
+
+<div class="figure">
+<p><img src="img/planning/2.png" alt="2.png" />
+</p>
+</div>
+
+<div class="resume">
+<p>
+指示の内容には、図のように初期状態とゴール、許可された行動のリストが入っています。
+ロボットは、自動プランニングにより、人間の代わりに適切な行動を組み立てて、ゴールを自動で達成します。
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> だからこそ: 自動プランナ Automated Planner</h3>
+<div class="outline-text-3" id="text-2-5">
+
+<div class="figure">
+<p><img src="img/planning/final.png" alt="final.png" />
+</p>
+</div>
+
+<div class="resume">
+<p>
+プランニングは汎用な枠組みなので、災害救助以外にも様々な問題に適用することができます。
+現実の応用例では「宇宙探査機運行問題」や「企業ネットワーク脆弱性問題」も表現できます。
+</p>
+
+<p>
+このように、プランニングは、難しい問題を汎用性を失わずに解くことを目指します。
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Q. はやりのDeep Learningとの違いは?</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+A. 抽象化レイヤが違う
+</p>
+
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span5">
+<p>
+<b>機械学習・Neural Networks</b> 
+</p>
+
+<p>
+for <b>認識・反射</b>
+</p>
+<ul class="org-ul">
+<li>入力 は <b>Subsymbolic</b>
+
+<p>
+画像、音声、非構造化text
+</p>
+</li>
+<li><b>1タイムステップ</b>:
+
+<p>
+　 <b><span class="underline">直後</span> の行動の決定</b>
+</p>
+<div class="smaller">
+<p>
+Reflex Agent = 脊髄反射
+</p>
+
+<p>
+<b>パブロフの犬</b> : 餌→よだれ
+</p>
+
+<p>
+<b>自動運転</b> : 赤信号,人 → 止まる.
+</p>
+
+<p>
+<b>FANUC産業ロボ</b> : 画像 → モータ出力
+</p>
+
+<p>
+<b>翻訳</b> : 文章 → 文章
+</p>
+
+</div>
+<p>
+☺ 効率よく 1-to-1 mapping
+</p>
+
+<p>
+☹ 単純作業
+</p>
+</li>
+</ul>
+
+</div>
+<div class="span7">
+<p>
+<b>推論・探索</b>
+</p>
+
+<p>
+for <b>プランニング・ゲーム・定理証明</b>
+</p>
+<ul class="org-ul">
+<li>入出力は <b>Symbolic</b>
+
+<p>
+論理、オブジェクト、ルール
+</p>
+</li>
+<li><b>&gt;1000タイムステップ(実運用上の実績):</b>
+
+<p>
+　 <b><span class="underline">未来に渡る</span> 戦略の決定</b>
+</p>
+
+<p>
+　 (戦略 = 行動の <b>列や木</b>)
+</p>
+<div class="smaller">
+<p>
+<b>レスキューロボ</b> : 行動列
+</p>
+
+<p>
+<b>囲碁,将棋</b> : ゴール = 勝利, 指し手の列
+</p>
+
+<p>
+<b>定理証明器</b> : ゴール = QED, 推論の列/木
+</p>
+
+<p>
+<b>コンパイラ</b> : 命令列の生成
+</p>
+
+</div>
+<div class="larger">
+<p>
+☺ 多数の論理の組み合わせ
+</p>
+
+</div>
+</li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="alignright">
+<p>
+AlphaGo = Subsymbolic (DLNNによる評価関数の学習) + Symbolic (UCT-MCTSによる探索)
+</p>
+
+</div>
+
+<div class="note">
+<p>
+DLNN: Deep Learning Neural Network
+</p>
+
+<p>
+UCT-MCTS: Monte Carlo Tree Search + Universal Confidence Bound applied on Trees
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-7" class="outline-3">
+<h3 id="sec-2-7"><span class="section-number-3">2.7</span> Q. SATとの違いは?</h3>
+<div class="outline-text-3" id="text-2-7">
+<p>
+A. どちらもSymbolicだが問題設定が違う
+</p>
+
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span6">
+<p>
+<b>SAT・制約充足問題</b> 
+</p>
+
+<ul class="org-ul">
+<li>入力 は <b>制約</b>, 出力は <b>割り当て</b>
+</li>
+<li><b>命題に時間概念なし</b>:
+
+<p>
+　 <b>(全制約を同時に満たす割り当て)</b>
+</p>
+<div class="smaller">
+<p>
+N-Queen : マス(x,y) にはQueen がいるかいないか(true/false)
+</p>
+
+<p>
+TSP : 辺e は 通るか通らないか(true/false)
+</p>
+
+</div>
+<p>
+NP完全
+</p>
+</li>
+</ul>
+
+</div>
+<div class="span6">
+<p>
+<b>プランニング</b>
+</p>
+
+<ul class="org-ul">
+<li>入力は <b>初期状態、状態遷移法則(アクション)、ゴール</b>
+</li>
+<li>出力は <b>アクションの列</b>
+</li>
+<li><b>真偽値は時刻により変化</b>:
+
+<div class="smaller">
+<p>
+レスキューロボット: 時刻tに浅井が生きているか居ないか(true/false)
+</p>
+
+</div>
+<div class="larger">
+<p>
+<b>PSPACE完全</b> ⊇ NP完全
+</p>
+
+</div>
+</li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 古典プランニング問題 (決定的,完全情報) &#x2013; Blocksworld</h2>
+<div class="outline-text-2" id="text-3">
+
+<div class="figure">
+<p><img src="img/plan.png" alt="plan.png" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> アクション = 条件付き状態遷移</h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="center">
+<div class="xlarge">
+<p>
+(move ?X ?Y)
+</p>
+
+</div>
+</div>
+
+
+<div class="container-fluid">
+<div class="row-fluid">
+<div class="span7">
+<blockquote>
+<p>
+<b>前提条件</b>
+</p>
+
+<p>
+積み木 <b>?X</b> の上に何もなく (1)
+</p>
+
+<p>
+積み木 <b>?Y</b> の上にも何もない (2)
+</p>
+
+<p>
+<b>追加効果</b>
+</p>
+
+<p>
+⇒ <b>?X</b> が <b>?Y</b> の上に移動する。(3)
+</p>
+
+<p>
+<b>削除効果</b>
+</p>
+
+<p>
+⇒ <b>?Y</b> は clear ではなくなる。(4)
+</p>
+</blockquote>
+
+</div>
+<div class="span5">
+<div class="org-src-container">
+
+<pre class="src src-lisp">(<span style="color: #483d8b;">:action</span> move
+ <span style="color: #483d8b;">:parameters</span> (?X ?Y)
+ <span style="color: #483d8b;">:preconditions</span>
+   (and (clear ?X)   <span style="color: #b22222;">; </span><span style="color: #b22222;">(1)</span>
+        (clear ?Y))  <span style="color: #b22222;">; </span><span style="color: #b22222;">(2)</span>
+
+ <span style="color: #483d8b;">:effect</span>
+   (and (on ?X ?Y)   <span style="color: #b22222;">; </span><span style="color: #b22222;">(3)</span>
+        (not         <span style="color: #b22222;">; </span><span style="color: #b22222;">(4)</span>
+         (clear ?Y))))
+</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<p>
+変数 <b>?X</b>, <b>?Y</b> などに値 <b>A</b>, <b>B</b> などを適用して使う
+</p>
+
+<div class="alignright">
+<div class="larger">
+<p>
+機械学習とのコラボ: これらのルールの自動生成
+</p>
+
+</div>
+
+</div>
+
+<div class="note">
+<p>
+<b>PDDL</b> : Planning Domain Description Language &#x2013; S式ベースの記述言語
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> プランニング = グラフ探索</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<b>ノード</b> : 状態 = 命題の集合 ⇒ <code>(on A B)</code>, <code>(clear A)</code> など
+</p>
+
+<p>
+<b>辺</b>     : アクション ⇒ <code>(move A B)</code> 等
+</p>
+
+
+<div class="figure">
+<p><img src="img/graph.png" alt="graph.png" />
+</p>
+</div>
+
+<div class="alignright">
+<div class="larger">
+<p>
+機械学習とのコラボ: 枝刈り用下界関数の自動生成/自動選択
+</p>
+
+</div>
+
+</div>
+
+<div class="note">
+<p>
+*1 [Helmert, 2006] [Richter, 2010]
+</p>
+
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 例: (仮)</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+アクション: <b>ニュートンの法則を学習</b>
+</p>
+
+<ul class="org-ul">
+<li>(and 微分の理解 積分の理解) → ニュートンの法則を理解
+</li>
+</ul>
+
+<p>
+アクション: <b>中学校の分数を学習</b>
+</p>
+
+<ul class="org-ul">
+<li>小学校の対分数を理解 → (and 中学校の分数を理解 (not 小学校の対分数を理解))
+</li>
+</ul>
+
+<p>
+モデルが間違っていると、中学生に帯分数入りの問題を与えてしまう可能性あり。
+</p>
+
+<p>
+(<b><i>注</i></b>: "→" は imply ではなく、「次ステップで」の意)
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> プランニングの拡張</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<b>核</b> となる 古典プランニング技術 を拡張 → より高い応用性、より困難な問題
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">拡張</th>
+<th scope="col" class="left">説明</th>
+<th scope="col" class="left">名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">Parallelism</td>
+<td class="left">アクションの並列実行、イベント</td>
+<td class="left">Temporal Planning (Scheduling)</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="left">Numeric</td>
+<td class="left">数値による前提条件/効果</td>
+<td class="left">Numeric Planning</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="left">Observability</td>
+<td class="left">現在状態の命題の真偽値が解らない</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">&#xa0;</td>
+<td class="left">(未知の決定的効果)</td>
+<td class="left">Conformant / Contingent Planning</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="left">Probabilistic</td>
+<td class="left">アクションの成功・失敗が分岐</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">&#xa0;</td>
+<td class="left">(既知の非決定的効果)</td>
+<td class="left">MDP Planning</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="left">Obs+Prob</td>
+<td class="left">(未知の非決定的効果)</td>
+<td class="left">POMDP Planning</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 例: Temporal Planning / スケジューリング</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+生徒は複数の科目の宿題を並列に与えられると考えられる
+</p>
+
+<p>
+アクション: <b>中学校の分数を学習</b>
+</p>
+
+<ul class="org-ul">
+<li>precondition: 小学校の対分数を理解
+</li>
+<li><b><i>duration: 2週間</i></b>
+</li>
+<li>effect:
+<ul class="org-ul">
+<li>(<b><i>at-first</i></b> (not 小学校の対分数を理解))
+</li>
+<li>(<b><i>at-end</i></b> 中学校の分数を理解)
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+Effect として at-first, at-end, over-all 修飾が行える (必要になる)
+</p>
+
+<p>
+例: 帯分数から分数の学習過渡期にある生徒に
+</p>
+
+<p>
+同時並行で (理科などで) 分数を用いる問題を与えるのは <b>混乱させてしまって不適切</b> ?
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 例2: Temporal Planning / スケジューリング</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+Mutex の実装 (Temporal Planning の表現力の例)
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-lisp">(<span style="color: #483d8b;">:action</span> take-lock <span style="color: #483d8b;">:parameters</span> (?file ?who)
+ <span style="color: #483d8b;">:precondition</span> (at-first (lock-free ?file))
+ <span style="color: #483d8b;">:duration</span> ?duration
+ <span style="color: #483d8b;">:effect</span> (and (over-all (not (lock-free ?file)))
+              (over-all (has-lock ?file ?who))))
+
+(<span style="color: #483d8b;">:action</span> write-file <span style="color: #483d8b;">:parameters</span> (?who ?file ?data ?old-data)
+ <span style="color: #483d8b;">:precondition</span> (and (over-all (has-lock ?file ?who))
+                    (at-first (file-written ?file ?old-data)))
+ <span style="color: #483d8b;">:duration</span> 4
+ <span style="color: #483d8b;">:effect</span> (and (at-first (not (file-written ?file ?old-data)))
+              (at-end   (file-written ?file ?data))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 例: Numeric Planning</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+前提条件に数値を用いる
+</p>
+
+<ul class="org-ul">
+<li><b>分数の補習授業</b>
+</li>
+<li>precondition: <b><i>点数が50点以下</i></b>
+</li>
+<li>effect:
+<ul class="org-ul">
+<li>(<b><i>increase</i></b> 点数 15)
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-lisp">(<span style="color: #483d8b;">:action</span> ball-bounce-x <span style="color: #483d8b;">:parameters</span> (?wall-x ?x ?vx)
+ <span style="color: #483d8b;">:precondition</span> (and (&lt; ?vx 0)
+                    (&lt; (- ?x ?wall-x) epsilon))
+ <span style="color: #483d8b;">:effect</span> (assign ?vx (- ?vx)))
+</pre>
+</div>
+
+<p>
+Assign とか multiply とか 不等号 <code>&lt;</code> とかいろいろつかえる
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> 例: Full/Partial/Null Observability</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+Null Observability: Observe アクションなし (目隠し): Conformant Planning
+</p>
+
+<p>
+&#x2013; 例: <b>平仮名がかけるかどうかわからないが、念の為に</b> 平仮名の授業をする
+</p>
+
+<p>
+Partial Observability: Observe アクション: Contingent Planning
+</p>
+
+<p>
+&#x2013; 例: 平仮名が <b>かけなかったら</b> 、平仮名の授業をする
+</p>
+
+<p>
+Full Observability: 古典プランニング
+</p>
+
+<p>
+&#x2013; 例: 平仮名が <b>かけないことは既知なので</b> 、平仮名の授業をする
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-5" class="outline-3">
+<h3 id="sec-4-5"><span class="section-number-3">4.5</span> Probabilistic Planning</h3>
+<div class="outline-text-3" id="text-4-5">
+<p>
+例: MDP Planning &#x2014; 確率遷移を用いる (Markov Decision Process)
+</p>
+
+<ul class="org-ul">
+<li>生徒が平仮名をかけないので授業をした。80% で成功する。
+</li>
+<li>失敗したのでやり直し。
+</li>
+</ul>
+
+<p>
+例: POMDP Planning &#x2014; 現在状態も曖昧 (Partically Observable Markov Decision Process)
+</p>
+
+<ul class="org-ul">
+<li>生徒はどうやら分数を理解していないようだ(確度80%)。
+</li>
+<li>授業をやった。より高い確率で分数を理解している。(確度96%)
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-6" class="outline-3">
+<h3 id="sec-4-6"><span class="section-number-3">4.6</span> 拡張問題の解き方</h3>
+<div class="outline-text-3" id="text-4-6">
+<div class="center">
+<div class="xlarge">
+<p>
+古典プランニングをベースにすることが多い
+</p>
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-7" class="outline-3">
+<h3 id="sec-4-7"><span class="section-number-3">4.7</span> 例: POMDP &#x2014; Relaxation by Determination (確信化)</h3>
+<div class="outline-text-3" id="text-4-7">
+<p>
+Yoon, Fern, Givan, 2007. FF-Replan: A Baseline for Probabilistic Planning 
+</p>
+
+<p>
+Pineda, Zilberstein, 2014. Planning Under Uncertainty Using Reduced Models: Revisiting Determinization
+</p>
+
+<p>
+確率的プランニング問題を古典プランニングとして解く。
+</p>
+
+<p>
+解くのには Fast Forward (FF) ソルバを使う。(2004年の古典プランニングState-of-the-Art)
+</p>
+
+<p>
+プラン実行中に予想外のことが起こったら、現在地点からリプランニング ← 驚くほど簡単
+</p>
+
+<p>
+2007年のコンペで "POMDP専門" アルゴリズム (LAO*, DP) よりはるかに良い成績
+</p>
+
+<p>
+研究の方向性としては「一部だけ確信化」する技法に進展。
+</p>
+
+<p>
+→「どの一部を」確信化するのがよいか? の選択技術の開発 etc&#x2026;
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> </h2>
+<div class="outline-text-2" id="text-5">
+<div class="xlarge">
+<div class="center">
+<p>
+プランニングの「ユーザ」として何をすればよいか?
+</p>
+</div>
+
+</div>
+</div>
+
+
+<div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> プランニングの「ユーザ」として何をすればよいか</h3>
+<div class="outline-text-3" id="text-5-1">
+<ul class="org-ul">
+<li><b>モデルの生成</b> を狙う。
+
+<ul class="org-ul">
+<li>(PO)MDPモデル / 古典モデルをデータから抽出
+</li>
+
+<li>例: 生徒を状態機械と捉えて遷移図にしてしまえ!
+</li>
+</ul>
+</li>
+
+<li><b>どの拡張は必要ない/無視できるか</b> を考えておくべき
+
+<ul class="org-ul">
+<li>古典プランニングの拡張は常に計算量増大
+</li>
+
+<li>生徒はおおよそSequencialだから並列性はいらない?
+</li>
+
+<li>生徒の理解度はほぼ確実に判定できる/できているから Fully-Observable と仮定して良い?
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> プランニングの「ユーザ」として何をすればよいか</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<b>International Planning Competition の結果を見る。</b>
+</p>
+
+<ul class="org-ul">
+<li>隔年開催
+</li>
+
+<li>ルール: オーガナイザの同一ハードウェア, 同一時間/メモリ制限で実験, 等
+</li>
+
+<li>コンペ参加条件: <b>ソースコードの公開</b>
+</li>
+
+<li>優秀なソルバをダウンロードできる (<b>ビルドできるとは限らない・・・</b>)
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Created: 2016-07-19 火 16:03</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

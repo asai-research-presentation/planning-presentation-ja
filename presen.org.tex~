@@ -1,0 +1,1110 @@
+
+\begin{outline-text-1}
+\begin{center}
+\begin{larger}
+\textbf{浅井 政太郎 (guicho2.71828)}
+\end{larger}
+
+東京大学 総合文化研究科 博士一年
+
+分野: 人工知能 推論・探索
+
+高速プランニングソルバの開発
+
+教授もLisper (CL-MPIの作者) → \url{http://metahack.org}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+\end{center}
+
+\begin{resume}
+My name is Masataro Asai, in this presentation, as other people do, Id like to 
+give a brief introduction to my research field and what I do.
+\end{resume}
+\end{outline-text-1}
+
+\section{章立て}
+\label{sec-1}
+
+Total 20分
+
+\begin{itemize}
+\item Lisp × \{マクロ, ユーティリティ, Utility Problem\}
+\begin{itemize}
+\item マクロとはどういう概念か?
+\item Common Lisp のマクロ
+\item Common Lisp のユーティリティ
+\item Common Lisp の Utility Problem
+\item Common Lisp での Utility Problem との闘いの歴史
+\end{itemize}
+\item プランニング × \{マクロ, ユーティリティ, Utility Problem\}
+\begin{itemize}
+\item 自動プランニングへのイントロダクション
+\item 自動プランニングの技術
+\item プランニングでのマクロ
+\item プランニングでの Utility Problem
+\end{itemize}
+\item マクロの学習
+\begin{itemize}
+\item プランニングでの マクロの学習
+\item Lisp マクロの学習?
+\item Future Direction --- Utility Problem をどう解くのか?
+\end{itemize}
+\end{itemize}
+
+\section{Lisp × \{マクロ, ユーティリティ, Utility Problem\}}
+\label{sec-2}
+
+マクロとはどういう概念か?
+
+Common Lisp のマクロ
+
+Common Lisp のユーティリティ
+
+Common Lisp の Utility Problem
+
+\subsection{マクロとは広義にはどういう概念か?}
+\label{sec-2-1}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span7}
+マクロという「名称」はLispだけ? → \textbf{NO.}
+
+\begin{alignright}
+→ \textbf{何らかの一般性を有する概念}
+\end{alignright}
+\end{span7}
+\begin{span5}
+\begin{center}
+\begin{tabular}{ll}
+Lisp & マクロ\\
+C & マクロ\\
+エクセル & マクロ\\
+秀丸 & マクロ\\
+Emacs & キーボードマクロ\\
+\end{tabular}
+\end{center}
+\end{span5}
+\end{row-fluid}
+\begin{row-fluid}
+　
+\end{row-fluid}
+\begin{row-fluid}
+\begin{span5}
+マクロ = 
+
+\textbf{複数の命令列に展開されるもの}
+\end{span5}
+\begin{span7}
+\texttt{with-open-file} 作業X 
+
+→ \texttt{open} + \texttt{unwind-protect} + 作業X + \texttt{close}
+\end{span7}
+\end{row-fluid}
+\end{container-fluid}
+
+\subsection{様々なマクロ (おさらい)}
+\label{sec-2-2}
+
+\begin{center}
+\begin{tabular}{lll}
+キーボードマクロ & C & Lisp\\
+(emacs, 秀丸 etc.) & マクロ & マクロ\\
+\hline
+キーボード入力の列に展開 & 文字列に展開 & \textbf{木構造に展開}\\
+\hline
+入力をパースできない & 入力をパース出来ない & \textbf{入力をパース出来る}\\
+\hline
+文字列ベース & 文字列ベース & \textbf{シンボルベース}\\
+\hline
+よく使うパターンの & よく使うパターンの & よく使うパターンの\\
+ショートカット & ショートカット & ショートカット\\
+\hline
+ &  & \textbf{言語となり思考を規定する}\\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Common Lisp の関数とマクロ}
+\label{sec-2-3}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+with-gensyms -- マクロ
+
+once-only -- マクロ
+
+ensure-list -- 関数
+
+symbolicate -- 関数
+\end{span6}
+\begin{span6}
+プログラマに与える恩恵は同じ
+
+\begin{alignright}
+(\textbf{抽象化の手段})
+\end{alignright}
+
+適用対象・状況・呼び方が異なるだけ
+
+\begin{alignright}
+\textbf{→ どちらも広義のマクロ}
+\end{alignright}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\subsection{Common Lisp における? ユーティリティ ＃とは}
+\label{sec-2-4}
+
+\begin{quote}
+--- is a \textbf{small}, \textbf{context-free}, \textbf{useful} bit of code that is
+\textbf{self-contained}, and \textbf{doesn't warrant an entire new library}.
+
+\begin{alignright}
+\emph{Robert Smith, Quickutil: A New Software Distribution Paradigm}
+\end{alignright}
+\end{quote}
+
+\begin{description}
+\item[{Small}] 1つか2つの独立した機能を持つ関数である。
+\item[{Self-contained}] 外部ライブラリに依存しない。
+\item[{Context-free}] 使い道が限定されない。
+\item[{Useful}] 主観的だが、とにかく「便利」
+\end{description}
+
+\subsection{Common Lisp における Utility Problem ＃とは}
+\label{sec-2-5}
+
+\begin{larger}
+\textbf{Utility Library Problem.}
+\end{larger}
+
+
+
+\begin{quote}
+\begin{verbatim}
+Common Lispプログラマなら以下のようなことを
+思ったことがあるのではないですかね。
+
+    Alexandriaは大きすぎる…
+
+    なんでAlexandriaにあの関数ないんだよ…
+
+    aandのためだけにarnesi…
+
+    split-sequence…
+
+そんな微妙な行き違いの結果、みんな
+オレオレユーティリティ集を作るみたいなことが発生する。
+\end{verbatim}
+\begin{alignright}
+\emph{深町英太郎: Lispユーティリティの新しい解決案「Quickutil」}
+\end{alignright}
+\end{quote}
+
+\textbf{一つのユーティリティ関数のために巨大なシステムをロードするのは嫌!}
+
+\textbf{複数のユーティリティ関数が複数のシステムにバラけている!}
+
+\subsection{Common Lisp での Utility Problem との闘いの歴史}
+\label{sec-2-6}
+
+\begin{itemize}
+\item 1970s --- そもそも処理系自体が乱立状態
+\item 1984 --- CLtL1
+\item 1990 --- CLtL2
+\item 1994 --- ANSI Common Lisp が成立、普及
+\item 1991 --- \emph{Portable utilities for Common Lisp user guide \& implementation notes}
+\item だれそれが作ったオレオレ・ユーティリティが乱立
+\item 2002 --- cl-utilities (google で期間指定して調べるとわかる)
+\item 2006 --- Alexandria (他の関数をいろいろまとめた)
+\item 2013 --- QuickUtil
+
+既存の有名なユーティリティ関数を集めたライブラリ
+
+新規性 : \textbf{個別のユーティリティを一つ一つロードできる}
+
+☺ 誰でもすぐに追加できる
+
+様々な議論 @ reddit \ldots{} e.g. "over-engineered"
+
+アイディアは良いのに、いまだ killer app にはなっていない → なぜ?
+\end{itemize}
+
+\section{}
+\label{sec-3}
+
+\begin{xlarge}
+自分の研究から
+\begin{center}
+使える知見は
+\end{center}
+\begin{alignright}
+ないだろうか??
+\end{alignright}
+\end{xlarge}
+
+\section{AI Topics -- プランニングへのイントロダクション}
+\label{sec-4}
+\subsection{誰?}
+\label{sec-4-1}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro/1.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue/1.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+And let me introduce these robots.
+The guy in the left is Astro boy.
+\end{resume}
+
+\subsubsection{誰?}
+\label{sec-4-1-1}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro/2.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue/1.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+As you know, he is a famous manga superhero invented by Tezuka Osamu in 50s,
+\end{resume}
+
+\subsubsection{誰?}
+\label{sec-4-1-2}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro/final.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue/1.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+and he can think, hear, speak, act. he also has emotions.
+\end{resume}
+
+\subsubsection{誰?}
+\label{sec-4-1-3}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro/final.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue/2.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+In contrast, the guy in the right is a real robot that is actually in use @ fukuoka prefecture for the rescue purpose..
+His name is T-52 Enryu, developped by a Japanese company Temzak.
+He is huge and powerful -- about 4 meters in height and can carry things which is as heavy as 500kg.
+Well, so, in a sense, he is also a superhero in the real disastrous situation.
+\end{resume}
+
+\subsubsection{誰?}
+\label{sec-4-1-4}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro/final.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue/3.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+But does he have feelings or can he think? Can he even move around by his own?
+\end{resume}
+
+\subsubsection{誰?}
+\label{sec-4-1-5}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\includegraphics{img/astro/final.png}
+\end{span6}
+\begin{span6}
+\includegraphics{img/rescue/final.png}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+No. It requires full human intervention --- it is indeed operated by a
+driver who gets in or by a remote control. It is more like a
+super-sophisticated shovel car.
+\end{resume}
+
+\subsection{実際の大規模災害では非実用的 --- 操縦士が足りない!}
+\label{sec-4-2}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span2}
+\includegraphics{img/rescue.png}
+\includegraphics{img/rescue.png}
+\includegraphics{img/rescue.png}
+\includegraphics{img/silent.png}
+\end{span2}
+\begin{span10}
+\includegraphics{img/static/tsunami.jpg}
+\end{span10}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{larger}
+\begin{alignright}
+\begin{itemize}
+\item そのままでは役に立たない!
+\end{itemize}
+\end{alignright}
+\end{larger}
+
+\begin{resume}
+Now the problem is : It's ok in small accidents but is impractical in the real, massive 
+natural disaster which frequently occurs in Japan.
+The key resource is human ---
+These special purpose vehicles require human intervention,
+thus they are useless without trained operators.
+\end{resume}
+
+\subsubsection{操縦士を増やせない -- Human Resource and Training}
+\label{sec-4-2-1}
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span4}
+\includegraphics{img/rescue/1.png}
+\end{span4}
+\begin{span8}
+
+
+\begin{description}
+\item[{✘ \emph{時間} がかかる}] 訓練に ＞100時間, \textbf{必要な時だけ増やす} のは不可能
+\item[{✘ \emph{￥￥￥￥} がかかる}] 訓練官、訓練場所、訓練用具
+\item[{✘ 技術は \emph{維持が重要}}] 定期的な再訓練、長期的コスト、さらなるマニー
+\item[{✘ 平時は \emph{無駄} な技術}] 普段は意味がない -- 無駄なマニー!
+\end{description}
+\end{span8}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{resume}
+In a natural disaster, we need as many experienced operators as possible.
+However, it is virtually impossible due to several reasons. 
+
+First, training takes time.
+It is impossible to quickly increase the number of operators as needed, at the time of disaster.
+
+Second, the money matters.
+Training a person costs a lot of money, including: the cost of maintaining
+a training center, the cost of additional vehicles for training, the cost
+of training the trainers, wages for trainers, etc.
+
+Third, Skills need to be updated and maintained.
+You know, how about preparing the large number of operators in advance?
+No, the society cannot torelate the cost of keep training them.
+Operators may lose the skills and skills may become outdated.
+
+Finally, in a normal situation, those skills are useless.
+It forces the society to waste a great amount of extra money.
+\end{resume}
+
+\subsection{だからこそ: 自動プランナ Automated Planner}
+\label{sec-4-3}
+
+\includegraphics{img/planning/1.png}
+
+\begin{resume}
+研究テーマのプランニングは、ロボットに、人間の助けを借りず、いかに自律して行動させるかを扱います。
+これをモデル化したプランニング問題は、具体的な行動の列を求める 組合せ最適化問題です。
+
+プランニング問題のタスクは、
+センサーから初期状態とゴールを受け取って、被災者を助ける正しい手順を出力することです。
+
+たとえば、この図では男性が瓦礫に埋まって助けを求めています。
+プランニング機能のあるロボットは、コレに対して「男性を助けよ」という大まかな指示を受けます。
+\end{resume}
+
+\subsection{だからこそ: 自動プランナ Automated Planner}
+\label{sec-4-4}
+
+\includegraphics{img/planning/2.png}
+
+\begin{resume}
+指示の内容には、図のように初期状態とゴール、許可された行動のリストが入っています。
+ロボットは、自動プランニングにより、人間の代わりに適切な行動を組み立てて、ゴールを自動で達成します。
+\end{resume}
+
+\subsection{だからこそ: 自動プランナ Automated Planner}
+\label{sec-4-5}
+
+\includegraphics{img/planning/final.png}
+
+\begin{resume}
+プランニングは汎用な枠組みなので、災害救助以外にも様々な問題に適用することができます。
+現実の応用例では「宇宙探査機運行問題」や「企業ネットワーク脆弱性問題」も表現できます。
+
+このように、プランニングは、難しい問題を汎用性を失わずに解くことを目指します。
+\end{resume}
+
+\subsection{Q. はやりのDeep Learningとの違いは?}
+\label{sec-4-6}
+
+A. 抽象化レイヤが違う
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\textbf{機械学習・Neural Networks} 
+
+for \textbf{認識・反射}
+\begin{itemize}
+\item 入力 は \textbf{Subsymbolic}
+
+画像、音声、非構造化テキスト
+\item \textbf{1タイムステップ}:
+
+　 \textbf{\uline{直後} の行動の決定}
+\begin{smaller}
+Reflex Agent = 脊髄反射
+
+\textbf{パブロフの犬} : 餌→よだれ
+
+\textbf{自動運転} : 赤信号,人 → 止まる.
+
+\textbf{ファナック産業ロボ} : 画像 → モータ出力
+
+\textbf{翻訳} : 文章 → 文章
+\end{smaller}
+☺ 効率よく 1-to-1 mapping
+
+☹ 単純作業
+\end{itemize}
+\end{span6}
+\begin{span6}
+\textbf{推論・探索}
+
+for \textbf{プランニング・ゲーム・定理証明}
+\begin{itemize}
+\item 入出力は \textbf{Symbolic}
+
+論理 オブジェクト ルール
+\item \textbf{>1000タイムステップ:}
+
+　 \textbf{\uline{未来に渡る} 戦略の決定}
+
+　 (戦略 = 行動の \textbf{列や木})
+\begin{smaller}
+\textbf{レスキューロボ} : 現実 = 難解パズル
+
+\textbf{囲碁,将棋} : ゴール = 勝利
+
+\textbf{証明器} : ゴール = QED
+
+\textbf{コンパイラ} : 命令列の生成
+\end{smaller}
+\begin{larger}
+☺ 多数の論理の組み合わせ
+\end{larger}
+\end{itemize}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\begin{alignright}
+AlphaGo = Subsymbolic (DLNNによる評価関数の学習) + Symbolic (UCT-MCTSによる探索)
+\end{alignright}
+
+\begin{note}
+DLNN: Deep Learning Neural Network
+
+UCT-MCTS: Monte Carlo Tree Search + Universal Confidence Bound applied on Trees
+\end{note}
+
+\section{プランニング問題 (決定的,完全情報) -- Blocksworld}
+\label{sec-5}
+
+\includegraphics{img/plan.png}
+
+\subsection{アクション = 条件付き状態遷移}
+\label{sec-5-1}
+
+\begin{center}
+\begin{xlarge}
+(move ?X ?Y)
+\end{xlarge}
+\end{center}
+
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span7}
+\begin{quote}
+\textbf{前提条件}
+
+積み木 \textbf{?X} の上に何もなく (1)
+
+積み木 \textbf{?Y} の上にも何もない (2)
+
+\textbf{追加効果}
+
+⇒ \textbf{?X} が \textbf{?Y} の上に移動する。(3)
+
+\textbf{削除効果}
+
+⇒ \textbf{?Y} は clear ではなくなる。(4)
+\end{quote}
+\end{span7}
+\begin{span5}
+\begin{verbatim}
+(:action move
+ :parameters (?X ?Y)
+ :preconditions
+   (and (clear ?X)   ; (1)
+	(clear ?Y))  ; (2)
+
+ :effect
+   (and (on ?X ?Y)   ; (3)
+	(not         ; (4)
+	 (clear ?Y))))
+\end{verbatim}
+\end{span5}
+\end{row-fluid}
+\end{container-fluid}
+
+変数 \textbf{?X}, \textbf{?Y} などに値 \textbf{A}, \textbf{B} などを適用して使う
+
+\begin{note}
+\textbf{PDDL} : Planning Domain Description Language -- S式ベースの記述言語
+\end{note}
+
+\subsection{プランニング = グラフ探索}
+\label{sec-5-2}
+
+\textbf{ノード} : 状態 = 命題の集合 ⇒ \texttt{(on A B)}, \texttt{(clear A)} など
+
+\textbf{辺}     : アクション ⇒ \texttt{(move A B)} 等
+
+\includegraphics{img/graph.png}
+
+
+\begin{note}
+*1 [Helmert, 2006] [Richter, 2010]
+\end{note}
+
+\section{プランニング × \{マクロ, ユーティリティ, Utility Problem\}}
+\label{sec-6}
+
+プランニングでのマクロ
+
+プランニングでの Utility Problem
+
+\subsection{プランニングでの マクロ: マクロ・オペレータ}
+\label{sec-6-1}
+
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\begin{larger}
+\begin{center}
+アクションの列を1つのアクションとして融合
+
+\textbf{(move a b) (move b c)}
+\end{center}
+
+\begin{alignright}
+→ \textbf{(move-move a b c)}
+\end{alignright}
+\end{larger}
+\end{span6}
+\begin{span6}
+\begin{center}
+\begin{tabular}{ll}
+ABSTRIPS & (Sacerdoti, '71)\\
+MORRIS & (Minton, '85)\\
+PRODIGY & (Minton, '89)\\
+\ldots{} & \\
+Macro-FF & (Botea et al. '05)\\
+Wizard & (Newton et al. '07)\\
+Marvin & (Coles and Smith '07)\\
+MUM & (Chrpa et. al. '14)\\
+\end{tabular}
+\end{center}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\subsection{アクション = 条件付き状態遷移}
+\label{sec-6-2}
+
+\begin{center}
+\begin{xlarge}
+(move ?X ?Y)
+\end{xlarge}
+\end{center}
+
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span7}
+\begin{quote}
+\textbf{前提条件}
+
+積み木 \textbf{?X} の上に何もなく (1)
+
+積み木 \textbf{?Y} の上にも何もない (2)
+
+\textbf{追加効果}
+
+⇒ \textbf{?X} が \textbf{?Y} の上に移動する。(3)
+
+\textbf{削除効果}
+
+⇒ \textbf{?Y} は clear ではなくなる。(4)
+\end{quote}
+\end{span7}
+\begin{span5}
+\begin{verbatim}
+(:action move
+ :parameters (?X ?Y)
+ :preconditions
+   (and (clear ?X)   ; (1)
+	(clear ?Y))  ; (2)
+
+ :effect
+   (and (on ?X ?Y)   ; (3)
+	(not         ; (4)
+	 (clear ?Y))))
+\end{verbatim}
+\end{span5}
+\end{row-fluid}
+\end{container-fluid}
+
+\subsection{マクロの作成}
+\label{sec-6-3}
+
+\begin{center}
+\begin{center}
+\begin{tabular}{l|cc|l|c|}
+actions & a$_{\text{1}}$ & a$_{\text{2}}$ &  & m=a$_{\text{1}}$ + a$_{\text{2}}$\\
+\hline
+parameters & params$_{\text{1}}$ & params$_{\text{2}}$ &  & 　　　　　　　　　　　\\
+ & X,Y & Y,Z &  & \\
+前提条件 & pre$_{\text{1}}$ & pre$_{\text{2}}$ &  & \\
+ & clear,clear & clear,clear &  & \\
+追加効果 & e\^{}+$_{\text{1}}$ & e\^{}+$_{\text{2}}$ &  & \\
+ & on & on &  & \\
+削除効果 & e\^{}-$_{\text{1}}$ & e\^{}-$_{\text{2}}$ &  & \\
+ & clear & clear &  & \\
+\end{tabular}
+\end{center}
+\end{center}
+
+\subsubsection{マクロの作成}
+\label{sec-6-3-1}
+
+\begin{center}
+\begin{center}
+\begin{tabular}{l|cc|l|c|}
+actions & a$_{\text{1}}$ & a$_{\text{2}}$ &  & m=a$_{\text{1}}$ + a$_{\text{2}}$\\
+\hline
+parameters & params$_{\text{1}}$ & params$_{\text{2}}$ &  & params$_{\text{1}}$ $\cup$ params$_{\text{2}}$\\
+ & X,Y & Y,Z &  & X,Y,Z\\
+前提条件 & pre$_{\text{1}}$ & pre$_{\text{2}}$ &  & \\
+ & clear,clear & clear,clear &  & \\
+追加効果 & e\^{}+$_{\text{1}}$ & e\^{}+$_{\text{2}}$ &  & \\
+ & on & on &  & \\
+削除効果 & e\^{}-$_{\text{1}}$ & e\^{}-$_{\text{2}}$ &  & \\
+ & clear,clear & clear,clear &  & \\
+\end{tabular}
+\end{center}
+\end{center}
+
+\begin{alignright}
+　.
+\end{alignright}
+
+\begin{resume}
+For example, the new parameters are approximately a union of the parameters
+of the base actions.
+\end{resume}
+
+\subsubsection{マクロの作成}
+\label{sec-6-3-2}
+
+\begin{center}
+\begin{center}
+\begin{tabular}{l|cc|l|c|}
+actions & a$_{\text{1}}$ & a$_{\text{2}}$ &  & m=a$_{\text{1}}$ + a$_{\text{2}}$\\
+\hline
+parameters & params$_{\text{1}}$ & params$_{\text{2}}$ &  & params$_{\text{1}}$ $\cup$ params$_{\text{2}}$\\
+ & X,Y & Y,Z &  & X,Y,Z\\
+前提条件 & pre$_{\text{1}}$ & pre$_{\text{2}}$ &  & pre$_{\text{1}}$ $\cup$ (pre$_{\text{2}}$ $\setminus$ e\^{}+$_{\text{1}}$)\\
+ & clear,clear & clear,clear &  & \\
+追加効果 & e\^{}+$_{\text{1}}$ & e\^{}+$_{\text{2}}$ &  & (e\^{}+$_{\text{1}}$ $\setminus$ e\^{}-$_{\text{2}}$) $\cup$ e\^{}+$_{\text{2}}$\\
+ & on & on &  & \\
+削除効果 & e\^{}-$_{\text{1}}$ & e\^{}-$_{\text{2}}$ &  & (e\^{}-$_{\text{1}}$ $\setminus$ e\^{}+$_{\text{2}}$) $\cup$ e\^{}-$_{\text{2}}$\\
+ & clear,clear & clear,clear &  & \\
+\end{tabular}
+\end{center}
+\end{center}
+
+\begin{alignright}
+打ち消し合う効果は消える
+\end{alignright}
+
+\begin{resume}
+the preconditions and effects are added or subtracted
+in order to cancell and hide the intermediate effects.
+\end{resume}
+
+\subsection{☺ 探索木が浅くなり高速化}
+\label{sec-6-4}
+
+\includegraphics{img/macro2/search.0.png}
+
+\begin{resume}
+The benefit of using macros is a speedup.
+this figure shows the search space of a planning problem, where the macros
+are shown in dotted lines.
+\end{resume}
+
+\subsubsection{☺ 探索木が浅くなり高速化}
+\label{sec-6-4-1}
+
+\includegraphics{img/macro2/search.1.png}
+
+\begin{resume}
+Thanks to the added macros, the goal can be found in 2 steps, compared to 3
+steps in the red solution, in the original domain.
+If the macro is long, it achieves a larger jump and speedup.
+\end{resume}
+
+\subsection{☹ 探索木の幅が増える}
+\label{sec-6-5}
+
+\includegraphics{img/macro2/search.2.png}
+
+\begin{alignright}
+→ 無駄なマクロが沢山あると遅くなる
+\end{alignright}
+
+\begin{resume}
+However, there is also several drawbacks.
+First, macros increase the branching factor.
+In this example, at the initial state,
+the number of edges have increased from 3 to 4,
+and it may increase the memory usage.
+\end{resume}
+
+\subsection{マクロオペレータの学習}
+\label{sec-6-6}
+
+EBL Explanation-Based Learning --- 「使えるマクロ」を訓練問題から学習する
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span4}
+\begin{description}
+\item[{簡単な練習問題}] 手紙を出しなさい
+
+\item[{練習プラン}] 文面を書く
+
+送り先住所を書く
+
+切手を手紙に貼る
+
+手紙を持つ
+
+ポストを探す
+
+ポストまで歩く
+
+手の中の物体を投函
+\end{description}
+\end{span4}
+\begin{span4}
+\begin{description}
+\item[{学習したマクロ}] \textbf{マクロ1(X,Y)}:
+
+　XをYに貼る
+
+　Yを持つ
+
+\textbf{マクロ2(X)}:
+
+　Xを探す
+
+　Xまで歩く
+\end{description}
+\end{span4}
+\begin{span4}
+\begin{description}
+\item[{難しい問題}] 確定申告をしなさい
+\item[{解答例}] 領収書を集める
+
+\ldots{}
+
+マクロ1(切手,封筒)
+
+マクロ2(ポスト)
+
+\ldots{}
+\end{description}
+\end{span4}
+\end{row-fluid}
+\end{container-fluid}
+
+\subsection{プランニングにおける Utility Problem}
+\label{sec-6-7}
+
+\begin{description}
+\item[{ゴミマクロが探索を遅くする}] 例: \textbf{手紙} を \textbf{封筒} に貼る + \textbf{封筒} を持つ --- 引数が適切でない
+
+\item[{過学習がおこる}] 一見良く見えたマクロ → 特定の状況でしか使えないものだった
+
+\item[{使えるマクロがどれか事前に解らない}] 例: \textbf{封筒} は練習問題には含まれないシンボル
+\end{description}
+
+\subsection{参考:様々なマクロフィルタリング手法がある}
+\label{sec-6-8}
+
+\begin{smaller}
+\begin{itemize}
+\item Macro Length limit -- 長さの制限 (よく使われる)
+\item MacroFF (Botea, Muller, Shaeffer 2005)
+\begin{itemize}
+\item Component Abstraction
+\item Occurrence points + Bonus
+\end{itemize}
+\item Wizard (Neuton et. al. 2007)
+\begin{itemize}
+\item 遺伝的アルゴリズムでマクロを学習
+\end{itemize}
+\item Marvin (Coles et. al. 2004;2007)
+\begin{itemize}
+\item 実行時に動的にマクロを学習
+\end{itemize}
+\item MUM (Chrpa et. al. 2014)
+\begin{itemize}
+\item Outer Entanglement
+\end{itemize}
+\item BLOMA (Chrpa, Siddiqui 2015)
+\begin{itemize}
+\item Block Deordering
+\end{itemize}
+\end{itemize}
+\end{smaller}
+
+\section{Lisp とプランニングにおけるUtility Problem の比較}
+\label{sec-7}
+
+\textbf{Lisp} におけるユーティリティ
+
+\begin{itemize}
+\item ユーティリティは人が書いてくれる
+\begin{itemize}
+\item →機械的に自動で発見・学習するよりも簡単に見える。
+\item →一見関連が無いように見えるが\ldots{}
+\end{itemize}
+\item Alexandria が 全然更新されない理由は?
+\begin{itemize}
+\item ← 知らない第三者の書いたマクロが本当に使えるのか、 \textbf{評価が難しい}
+\item ← \textbf{新機能の追加に躊躇する (保守的)}
+\item ← いつの時代も、人間の一番大きなコストは \textbf{コミュニケーションコスト}
+\begin{itemize}
+\item (人類 = プログラムを自動生成する分散並列探索アルゴリズム)
+\end{itemize}
+\item \textbf{Gmail,SNSのような自動フィルタリング・サジェスト機能が必要}
+\end{itemize}
+\item Quicklisp が流行った理由は?
+\begin{itemize}
+\item Zach が毎月 \textbf{ある程度} の質を保ってくれているから！
+\item (\textbf{ある程度} とは?)
+\end{itemize}
+\end{itemize}
+
+\section{手法}
+\label{sec-8}
+
+3346の QuickLisp システムを全てロードする
+\begin{alignright}
+\begin{smaller}
+参考: \href{http://g000001.cddddr.org/3610010400}{\#:g1: Quicklisp全部入りコアを作ろう}
+\end{smaller}
+\end{alignright}
+
+全パッケージのfbound シンボルを集める
+
+名前でソートして再実装を見つける
+
+時間的都合で出来なかったが、もう少したったらやりたいこと:
+
+✘ swank-xref で何回参照されているかを調べる
+
+✘ Lisp のマクロを学習できるか?
+
+\section{名前でソートして再実装を見つける}
+\label{sec-9}
+
+一回目, remove-duplicate が遅すぎて失敗 << シンボルが30万個ぐらいあった
+
+二回目: hashtable実装で
+
+\begin{verbatim}
+(ql:quickload '(:iterate :eazy-gnuplot))
+(use-package '(:iterate :eazy-gnuplot))
+
+(defparameter *all-symbols*
+  (let (acc)
+    (do-all-symbols (s acc)
+      (when (fboundp s) (push s acc)))))
+
+(defparameter *all-names*
+  (make-hash-table :test #'equal))
+
+(defparameter *histogram*
+  (sort (hash-table-alist *all-names*) #'> :key #'cdr))
+
+(with-plots (s)
+  (gp-setup :output "img/histogram.png")
+  (plot (lambda () (iter (for (name . count) in *histogram*) (print count)))))
+\end{verbatim}
+
+\subsection{結果}
+\label{sec-9-1}
+
+ロングテール!
+
+\includegraphics{img/static/histogram.png}
+
+\subsection{内訳}
+\label{sec-9-2}
+
+なぜこんなに\ldots{} (急ぎだったのであまり細かくは見れていない)
+
+\begin{container-fluid}
+\begin{row-fluid}
+\begin{span6}
+\begin{smaller}
+\begin{verbatim}
+("NAME" . 69)
+("ENSURE-LIST" . 52)
+("WITH-GENSYMS" . 49)
+("TEST/ALL" . 48)
+("WHEN-LET" . 43)
+("AIF" . 37)
+("TEST" . 36)
+("+" . 36)
+("-" . 35)
+("SIZE" . 34)
+("TIME" . 34)
+("*" . 33)
+("RUN" . 32)
+("CLOSE" . 32)
+("MESSAGE" . 30)
+("LOG" . 30)
+("LENGTH" . 30)
+\end{verbatim}
+\end{smaller}
+\end{span6}
+
+\begin{span6}
+\begin{smaller}
+\begin{verbatim}
+("/" . 29)
+("EXPT" . 29)
+("=" . 29)
+("WITH-UNIQUE-NAMES" . 29)
+("OPEN" . 28)
+(">" . 28)
+("<" . 28)
+("UNION" . 28)
+("ONCE-ONLY" . 28)
+("AWHEN" . 28)
+("COS" . 27)    ; wtf??
+("SIN" . 27)    ; wtf??
+("SQRT" . 27)
+("TAN" . 27)
+("<=" . 27)
+("TEXT" . 27)
+("STRING" . 27)
+("MAX" . 27)
+("INTERSECTION" . 27)
+(">=" . 27)
+("FLATTEN" . 26)
+("DEFCONSTANT" . 26)
+("WRITE" . 26)
+("CLASS-NAME" . 26)
+("MAP" . 26)
+("COMPOSE" . 25)
+\end{verbatim}
+\end{smaller}
+\end{span6}
+\end{row-fluid}
+\end{container-fluid}
+
+\section{まとめ}
+\label{sec-10}
+
+Common Lisp のユーティリティ問題について話した。
+
+プランニングでのユーティリティ問題について話した。
+
+いつの時代も、人間の一番大きなコストは \textbf{コミュニケーションコスト}
+
+\textbf{Gmail,SNSのような自動フィルタリング・サジェスト機能が必要}
+
+---- \textbf{実験}:
+
+Quicklisp ライブラリ中のシンボルをソートして再実装を見つけた。
+
+✘ swank-xref で何回参照されているかを調べられなかった。
+
+✘ Lisp のマクロを学習できなかった。
+
+---- \textbf{Future work}:
+
+全ライブラリを読み込んで, どれだけの reputation を得ているかを調べる。
+
+reputation によってユーティリティをランク付けし、quicklisp リリースごとに動的に更新する。
+
+使われないユーティリティは消される! 流行りのユーティリティは入ってくる!
