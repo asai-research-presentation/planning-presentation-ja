@@ -13,7 +13,7 @@
 *浅井 政太郎 (guicho2.71828)*
 #+END_LARGER
 
-東京大学 総合文化研究科 博士一年
+東京大学 総合文化研究科 博士2年
 
 分野: 人工知能 推論・探索
 
@@ -42,13 +42,10 @@ give a brief introduction to my research field and what I do.
 
 * 章立て
 
-Total 20分
-
-+ プランニング × {マクロ, ユーティリティ, Utility Problem}
-  + 自動プランニングへのイントロダクション
-  + 自動プランニングの技術
-  + プランニングでのマクロ
-  + プランニングでの Utility Problem
++ 自動プランニングへのイントロダクション --- 目的、スコープ
++ 古典プランニング
++ 古典プランニングの拡張クラス (より実用的)
++ プランニングの「ユーザ」として何をすればよいか
 
 * AI Topics -- プランニングへのイントロダクション
 ** 誰?
@@ -324,13 +321,13 @@ Total 20分
 
  #+BEGIN_CONTAINER-FLUID
  #+BEGIN_ROW-FLUID
- #+BEGIN_SPAN6
+ #+BEGIN_SPAN5
  *機械学習・Neural Networks* 
  
  for *認識・反射*
  + 入力 は *Subsymbolic*
    
-   画像、音声、非構造化テキスト
+   画像、音声、非構造化text
  + *1タイムステップ*:
    
    　 *_直後_ の行動の決定*
@@ -348,32 +345,32 @@ Total 20分
    ☺ 効率よく 1-to-1 mapping
    
    ☹ 単純作業
- #+END_SPAN6
- #+BEGIN_SPAN6
+ #+END_SPAN5
+ #+BEGIN_SPAN7
  *推論・探索*
 
  for *プランニング・ゲーム・定理証明*
  + 入出力は *Symbolic*
    
-   論理 オブジェクト ルール
- + *>1000タイムステップ:*
+   論理、オブジェクト、ルール
+ + *>1000タイムステップ(実運用上の実績):*
 
    　 *_未来に渡る_ 戦略の決定*
    
    　 (戦略 = 行動の *列や木*)
    #+BEGIN_SMALLER
-   *レスキューロボ* : 現実 = 難解パズル
+   *レスキューロボ* : 行動列
 
-   *囲碁,将棋* : ゴール = 勝利
+   *囲碁,将棋* : ゴール = 勝利, 指し手の列
 
-   *証明器* : ゴール = QED
+   *定理証明器* : ゴール = QED, 推論の列/木
 
    *コンパイラ* : 命令列の生成
    #+END_SMALLER
    #+BEGIN_LARGER
    ☺ 多数の論理の組み合わせ
    #+END_LARGER
- #+END_SPAN6
+ #+END_SPAN7
  #+END_ROW-FLUID
  #+END_CONTAINER-FLUID
 
@@ -387,13 +384,44 @@ DLNN: Deep Learning Neural Network
 UCT-MCTS: Monte Carlo Tree Search + Universal Confidence Bound applied on Trees
 #+END_NOTE
 
-** Reflex Agent vs Goal-based Agents :noexport:
+** Q. SATとの違いは?
 
- [[png:planning-deeplearning]]
+A. どちらもSymbolicだが問題設定が違う
 
- AI's Ethics? --- subject to the "users"
+#+BEGIN_CONTAINER-FLUID
+#+BEGIN_ROW-FLUID
+#+BEGIN_SPAN6
+*SAT・制約充足問題* 
 
-* プランニング問題 (決定的,完全情報) -- Blocksworld
++ 入力 は *制約*, 出力は *割り当て*
++ *命題に時間概念なし*:
+  
+  　 *(全制約を同時に満たす割り当て)*
+  #+BEGIN_SMALLER
+  N-Queen : マス(x,y) にはQueen がいるかいないか(true/false)
+  
+  TSP : 辺e は 通るか通らないか(true/false)
+  #+END_SMALLER
+  NP完全
+#+END_SPAN6
+#+BEGIN_SPAN6
+*プランニング*
+
++ 入力は *初期状態、状態遷移法則(アクション)、ゴール*
++ 出力は *アクションの列*
++ *真偽値は時刻により変化*:
+  
+  #+BEGIN_SMALLER
+  レスキューロボット: 時刻tに浅井が生きているか居ないか(true/false)
+  #+END_SMALLER
+  #+BEGIN_LARGER
+  *PSPACE完全* ⊇ NP完全
+  #+END_LARGER
+#+END_SPAN6
+#+END_ROW-FLUID
+#+END_CONTAINER-FLUID
+
+* 古典プランニング問題 (決定的,完全情報) -- Blocksworld
 
 [[png:plan]]
 
@@ -444,6 +472,12 @@ UCT-MCTS: Monte Carlo Tree Search + Universal Confidence Bound applied on Trees
 
 変数 *?X*, *?Y* などに値 *A*, *B* などを適用して使う
 
+#+BEGIN_ALIGNRIGHT
+#+BEGIN_LARGER
+機械学習とのコラボ: これらのルールの自動生成
+#+END_LARGER
+#+END_ALIGNRIGHT
+
 #+BEGIN_NOTE
 *PDDL* : Planning Domain Description Language -- S式ベースの記述言語
 #+END_NOTE
@@ -468,7 +502,167 @@ UCT-MCTS: Monte Carlo Tree Search + Universal Confidence Bound applied on Trees
 # #+END_ROW-FLUID
 # #+END_CONTAINER-FLUID
 
+#+BEGIN_ALIGNRIGHT
+#+BEGIN_LARGER
+機械学習とのコラボ: ヒューリスティック関数の自動生成/自動選択
+#+END_LARGER
+#+END_ALIGNRIGHT
+
 #+BEGIN_NOTE
 *1 [Helmert, 2006] [Richter, 2010]
 #+END_NOTE
   
+
+** 例: (仮)
+
+アクション: *ニュートンの法則を学習*
+
++ (and 微分の理解 積分の理解) → ニュートンの法則を理解
+
+アクション: *中学校の分数を学習*
+
++ 小学校の対分数を理解 → (and 中学校の分数を理解 (not 小学校の対分数を理解))
+
+モデルが間違っていると、中学生に帯分数入りの問題を与えてしまう可能性あり。
+
+(*/注/*: "→" は imply ではない)
+
+* プランニングの拡張
+
+*核* となるのが 古典プランニング技術
+
+それに様々な拡張を加える → より高い応用性、より困難な問題
+
+| 拡張          | 説明                             | 名称                           |
+|---------------+----------------------------------+--------------------------------|
+| Parallelism   | アクションの並列実行、イベント   | Temporal Planning (Scheduling) |
+|---------------+----------------------------------+--------------------------------|
+| Observability | 現在状態の命題の真偽値が解らない |                                |
+|               | (未知の決定的効果)               |                                |
+|               | Observe アクションなし(目隠し)   | Conformant Planning            |
+|               | Observe アクションあり           | Contingent Planning            |
+|---------------+----------------------------------+--------------------------------|
+| Probabilistic | アクションの成功・失敗が分岐     |                                |
+|               | (既知の非決定的効果)             | (PO)MDP Planning               |
+
+** 例: Temporal Planning / スケジューリング
+
+生徒は複数の科目の宿題を並列に与えられると考えられる
+
+アクション: *中学校の分数を学習*
+
++ precondition: 小学校の対分数を理解
++ */duration: 2週間/*
++ effect:
+  + (*/at-first/* (not 小学校の対分数を理解))
+  + (*/at-end/* 中学校の分数を理解)
+
+Effect として at-first, at-end, over-all 修飾が行える (必要になる)
+
+例: 帯分数から分数の学習過渡期にある生徒に
+
+同時並行で (理科などで) 分数を用いる問題を与えるのは *混乱させてしまって不適切* ?
+
+** 例2: Temporal Planning / スケジューリング
+
+Mutex の実装 (Temporal Planning の表現力の例)
+
+#+BEGIN_SRC lisp
+(:action take-lock :parameters (?file ?who)
+ :precondition (at-first (lock-free ?file))
+ :duration ?duration
+ :effect (and (over-all (not (lock-free ?file)))
+              (over-all (has-lock ?file ?who))))
+
+(:action write-file :parameters (?who ?file ?data ?old-data)
+ :precondition (and (over-all (has-lock ?file ?who))
+                    (at-first (file-written ?file ?old-data)))
+ :duration 4
+ :effect (and (at-first (not (file-written ?file ?old-data)))
+              (at-end   (file-written ?file ?data))))
+#+END_SRC
+
+** 例: Full/Partial/Null Observability
+
+Null Observability: Observe アクションなし (目隠し): Conformant Planning
+
+-- 例: *平仮名がかけるかどうかわからないが、念の為に* 平仮名の授業をする
+
+Partial Observability: Observe アクション: Contingent Planning
+
+-- 例: 平仮名が *かけなかったら* 、平仮名の授業をする
+
+Full Observability: 古典プランニング
+
+-- 例: 平仮名が *かけないことは既知なので* 、平仮名の授業をする
+
+** Probabilistic Planning
+
+例: MDP Planning --- 確率遷移を用いる (Markov Decision Process)
+
++ 生徒が平仮名をかけないので授業をした。80% で成功する。
++ 失敗したのでやり直し。
+
+例: POMDP Planning --- 現在状態も曖昧 (Partically Observable Markov Decision Process)
+
++ 生徒はどうやら分数を理解していないようだ(確度80%)。
++ 授業をやった。より高い確率で分数を理解している。(確度96%)
+
+** 拡張問題の解き方
+
+#+BEGIN_CENTER
+#+BEGIN_XLARGE
+古典プランニングをベースにすることが多い
+#+END_XLARGE
+#+END_CENTER
+
+** 例: POMDP --- Relaxation by Determination (確信化)
+
+Yoon, Fern, Givan, 2007. FF-Replan: A Baseline for Probabilistic Planning 
+
+Pineda, Zilberstein, 2014. Planning Under Uncertainty Using Reduced Models: Revisiting Determinization
+
+確率的プランニング問題を古典プランニングとして解く。
+
+解くのには Fast Forward (FF) ソルバを使う。(2004年の古典プランニングState-of-the-Art)
+
+プラン実行中に予想外のことが起こったら、現在地点からリプランニング ← 驚くほど簡単
+
+2007年のコンペで "POMDP専門" アルゴリズム (LAO*, DP) よりはるかに良い成績
+
+研究の方向性としては「一部だけ確信化」する技法に進展。
+
+→「どの一部を」確信化するのがよいか? の選択技術の開発 etc...
+
+* 
+
+#+BEGIN_XLARGE
+#+BEGIN_CENTER
+プランニングの「ユーザ」として何をすればよいか?
+#+END_CENTER
+#+END_XLARGE
+
+
+** プランニングの「ユーザ」として何をすればよいか
+
++ *モデルの生成* を狙う。
+  
+  + (PO)MDPモデル / 古典モデルをデータから抽出
+  
+  + 例: 生徒を状態機械と捉えて遷移図にしてしまえ!
+
++ *どの拡張は必要ない/無視できるか* を考えておくべき
+
+  + 古典プランニングの拡張は常に計算量増大
+
+** プランニングの「ユーザ」として何をすればよいか
+
+*International Planning Competition の結果を見る。*
+
++ 隔年開催
+
++ ルール: オーガナイザの同一ハードウェア, 同一時間/メモリ制限で実験, 等
+
++ コンペ参加条件: *ソースコードの公開*
+
++ 優秀なソルバをダウンロードできる (*ビルドできるとは限らない・・・*)
