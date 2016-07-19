@@ -338,7 +338,7 @@ give a brief introduction to my research field and what I do.
    
    *自動運転* : 赤信号,人 → 止まる.
    
-   *ファナック産業ロボ* : 画像 → モータ出力
+   *FANUC産業ロボ* : 画像 → モータ出力
 
    *翻訳* : 文章 → 文章
    #+END_SMALLER
@@ -504,7 +504,7 @@ A. どちらもSymbolicだが問題設定が違う
 
 #+BEGIN_ALIGNRIGHT
 #+BEGIN_LARGER
-機械学習とのコラボ: ヒューリスティック関数の自動生成/自動選択
+機械学習とのコラボ: 枝刈り用下界関数の自動生成/自動選択
 #+END_LARGER
 #+END_ALIGNRIGHT
 
@@ -525,7 +525,7 @@ A. どちらもSymbolicだが問題設定が違う
 
 モデルが間違っていると、中学生に帯分数入りの問題を与えてしまう可能性あり。
 
-(*/注/*: "→" は imply ではない)
+(*/注/*: "→" は imply ではなく、「次ステップで」の意)
 
 * プランニングの拡張
 
@@ -537,13 +537,17 @@ A. どちらもSymbolicだが問題設定が違う
 |---------------+----------------------------------+--------------------------------|
 | Parallelism   | アクションの並列実行、イベント   | Temporal Planning (Scheduling) |
 |---------------+----------------------------------+--------------------------------|
+| Numeric       | 数値による前提条件               | Numeric Planning               |
+|---------------+----------------------------------+--------------------------------|
 | Observability | 現在状態の命題の真偽値が解らない |                                |
 |               | (未知の決定的効果)               |                                |
 |               | Observe アクションなし(目隠し)   | Conformant Planning            |
 |               | Observe アクションあり           | Contingent Planning            |
 |---------------+----------------------------------+--------------------------------|
 | Probabilistic | アクションの成功・失敗が分岐     |                                |
-|               | (既知の非決定的効果)             | (PO)MDP Planning               |
+|               | (既知の非決定的効果)             | MDP Planning                   |
+|---------------+----------------------------------+--------------------------------|
+| Obs+Prob      | (未知の非決定的効果)             | POMDP Planning                 |
 
 ** 例: Temporal Planning / スケジューリング
 
@@ -581,6 +585,24 @@ Mutex の実装 (Temporal Planning の表現力の例)
  :effect (and (at-first (not (file-written ?file ?old-data)))
               (at-end   (file-written ?file ?data))))
 #+END_SRC
+
+** 例: Numeric Planning
+
+前提条件に数値を用いる
+
++ *分数の補習授業*
++ precondition: */点数が50点以下/*
++ effect:
+  + (*/increase/* 点数 15)
+
+#+BEGIN_SRC lisp
+(:action ball-bounce-x :parameters (?wall-x ?x ?vx)
+ :precondition (and (< ?vx 0)
+                    (< (- ?x ?wall-x) epsilon))
+ :effect (assign ?vx (- ?vx)))
+#+END_SRC
+
+Assign とか multiply とか 不等号 =<= とかいろいろつかえる
 
 ** 例: Full/Partial/Null Observability
 
